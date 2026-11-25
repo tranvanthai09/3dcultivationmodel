@@ -5,13 +5,16 @@
   <title>Mô hình 3D Thực tế 1 Hecta (10.000m²): Chanh dây - Cacao</title>
   <style>
     body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; background: #a6d8f5; }
-    #hud {
-      position: absolute; top: 12px; left: 12px; color: #f0f6fc;
-      background: rgba(18, 25, 22, 0.84); backdrop-filter: blur(6px);
-      padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15);
-      font-size: 13px; line-height: 1.55; max-width: 350px;
+    .panel {
+      position: absolute; top: 12px; color: #f0f6fc;
+      background: rgba(18, 25, 22, 0.85); backdrop-filter: blur(6px);
+      padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.16);
+      font-size: 13px; line-height: 1.5; box-shadow: 0 6px 20px rgba(0,0,0,0.28);
     }
-    #hud h3 { margin: 0 0 6px 0; color: #7ee787; font-size: 15px; }
+    #hud { left: 12px; max-width: 345px; }
+    #cost-panel { right: 12px; width: 320px; }
+
+    .panel h3 { margin: 0 0 6px 0; color: #7ee787; font-size: 14.5px; }
     .legend { margin: 6px 0; font-size: 12.5px; }
     .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
     button {
@@ -21,10 +24,27 @@
     button:hover { background: #3fb950; }
     button.sec { background: #30363d; }
     button.sec:hover { background: #484f58; }
+
+    /* Bảng chi phí */
+    .cost-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;
+    }
+    .cost-sub {
+      font-size: 12px; color: #ffd54f; margin-bottom: 8px; padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+    .cost-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .cost-table td { padding: 4px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+    .cost-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+    .cost-total td {
+      padding-top: 8px; border-bottom: none; border-top: 1px solid rgba(255,255,255,0.25);
+      font-size: 14px; font-weight: 700; color: #7ee787;
+    }
   </style>
 </head>
 <body>
-  <div id="hud">
+  <!-- Khung thông tin mô hình bên trái -->
+  <div id="hud" class="panel">
     <h3>VƯỜN 1 HECTA: CHANH DÂY + CACAO</h3>
     <div class="legend">
       • Đất vuông: <b>100m × 100m (10.000 m²)</b><br>
@@ -44,9 +64,57 @@
     </div>
   </div>
 
+  <!-- Khung bảng chi phí bên phải -->
+  <div id="cost-panel" class="panel">
+    <div class="cost-header">
+      <h3 style="margin:0;">DỰ TOÁN CHI PHÍ ĐẦU TƯ</h3>
+      <button id="toggle-cost-btn" class="sec" style="padding:3px 8px; font-size:11px;" onclick="toggleCost()">Thu gọn</button>
+    </div>
+    <div id="cost-body">
+      <div class="cost-sub">
+        <b>Mô hình 1ha chanh dây trồng thuần</b><br>
+        Mật độ cây trồng: <b>1,5m × 3m</b>
+      </div>
+      <table class="cost-table">
+        <tr>
+          <td>• Cây giống (2.000 cây)</td>
+          <td>52.000.000 đ</td>
+        </tr>
+        <tr>
+          <td>• Tre dựng (2.000 gốc)</td>
+          <td>30.000.000 đ</td>
+        </tr>
+        <tr>
+          <td>• Dây</td>
+          <td>15.000.000 đ</td>
+        </tr>
+        <tr>
+          <td>• Phân bón + thuốc (6 tháng)</td>
+          <td>40.000.000 đ</td>
+        </tr>
+        <tr>
+          <td>• Công chăm sóc</td>
+          <td>70.000.000 đ</td>
+        </tr>
+        <tr class="cost-total">
+          <td>Tổng cộng</td>
+          <td>207.000.000 đ</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script>
+    function toggleCost() {
+      const body = document.getElementById('cost-body');
+      const btn = document.getElementById('toggle-cost-btn');
+      const hidden = body.style.display === 'none';
+      body.style.display = hidden ? 'block' : 'none';
+      btn.textContent = hidden ? 'Thu gọn' : 'Mở rộng';
+    }
+
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xa6d8f5);
     scene.fog = new THREE.FogExp2(0xa6d8f5, 0.0026);
@@ -127,7 +195,7 @@
       return seed / 4294967296;
     }
 
-    // --- HÌNH HỌC CƠ SỞ ĐỂ INSTANCING (GIÚP CHẠY MƯỢT 1 HECTA) ---
+    // --- HÌNH HỌC CƠ SỞ ---
     function createLeafGeometry(length, width, droop) {
       const geo = new THREE.BufferGeometry();
       const hw = width / 2;
@@ -143,7 +211,6 @@
     const postH = 2.1;
     const tWidth = 1.0;
 
-    // Geometry dùng chung
     const bedGeo = new THREE.BoxGeometry(0.75, 0.12, 92.2);
     const pipePFGeo = new THREE.CylinderGeometry(0.016, 0.016, 92.0, 5);
     pipePFGeo.rotateX(Math.PI / 2);
@@ -155,7 +222,6 @@
     const anchorGeo = new THREE.BoxGeometry(0.22, 0.14, 0.22);
     const stakeGeo = new THREE.CylinderGeometry(0.012, 0.015, postH, 4);
 
-    // Thân chanh dây leo xoắn (từ 0 -> postH)
     const pfStemGeo = new THREE.TubeGeometry(
       new THREE.CatmullRomCurve3([
         new THREE.Vector3(0.03, 0.08, 0),
@@ -165,7 +231,6 @@
       ]), 6, 0.018, 4, false
     );
 
-    // Cành chanh dây vươn ra và rủ xuống mép chữ T
     const pfRunnerGeo = new THREE.TubeGeometry(
       new THREE.CatmullRomCurve3([
         new THREE.Vector3(0, 0.02, 0),
@@ -174,7 +239,6 @@
       ]), 5, 0.011, 4, false
     );
 
-    // Thân chính Cacao (0 -> 1.0m)
     const cacaoTrunkGeo = new THREE.TubeGeometry(
       new THREE.CatmullRomCurve3([
         new THREE.Vector3(0, 0, 0),
@@ -183,7 +247,6 @@
       ]), 5, 0.055, 6, false
     );
 
-    // Cành chảng ba (Jorquette) Cacao (từ 0,0,0 vươn ra +X)
     const cacaoBranchGeo = new THREE.TubeGeometry(
       new THREE.CatmullRomCurve3([
         new THREE.Vector3(0, 0, 0),
@@ -192,7 +255,6 @@
       ]), 4, 0.028, 5, false
     );
 
-    // Cành cấp 2 (cành quạt)
     const cacaoSubBranchGeo = new THREE.TubeGeometry(
       new THREE.CatmullRomCurve3([
         new THREE.Vector3(0, 0, 0),
@@ -222,17 +284,15 @@
     const matPodY = new THREE.MeshPhongMaterial({ color: 0xe8b923, shininess: 25 });
     const matPodR = new THREE.MeshPhongMaterial({ color: 0xb84323, shininess: 25 });
 
-    // Số lượng thực tế
-    const PF_ROWS = 31, PF_PLANTS_PER_ROW = 62, PF_TOTAL = PF_ROWS * PF_PLANTS_PER_ROW; // 1.922
-    const POSTS_PER_ROW = 21, POST_TOTAL = PF_ROWS * POSTS_PER_ROW; // 651
-    const CACAO_ROWS = 30, CACAO_PER_ROW = 31, CACAO_TOTAL = CACAO_ROWS * CACAO_PER_ROW; // 930
+    const PF_ROWS = 31, PF_PLANTS_PER_ROW = 62, PF_TOTAL = PF_ROWS * PF_PLANTS_PER_ROW;
+    const POSTS_PER_ROW = 21, POST_TOTAL = PF_ROWS * POSTS_PER_ROW;
+    const CACAO_ROWS = 30, CACAO_PER_ROW = 31, CACAO_TOTAL = CACAO_ROWS * CACAO_PER_ROW;
 
     const PF_LEAVES_PER_PLANT = 22;
     const PF_FRUITS_PER_PLANT = 4;
     const C_OLD_PER_TREE = 52;
     const C_YOUNG_PER_TREE = 12;
 
-    // Tạo các InstancedMesh
     const instBed = new THREE.InstancedMesh(bedGeo, matSoil, PF_ROWS);
     const instPipePF = new THREE.InstancedMesh(pipePFGeo, matPipe, PF_ROWS);
     const instPipeCacao = new THREE.InstancedMesh(pipeCacaoGeo, matPipe, CACAO_ROWS);
@@ -256,24 +316,20 @@
     const instCPodY = new THREE.InstancedMesh(cacaoPodGeo, matPodY, CACAO_TOTAL * 3);
     const instCPodR = new THREE.InstancedMesh(cacaoPodGeo, matPodR, CACAO_TOTAL * 2);
 
-    // Bật đổ bóng cho các thành phần chính
     [instPost, instTBar, instPFLeaf, instCTrunk, instCBranch, instCOldLeaf].forEach(m => { m.castShadow = true; });
     instBed.receiveShadow = true;
     instMulch.receiveShadow = true;
 
     const dummy = new THREE.Object3D();
-    const wireVerts = []; // Gom toàn bộ dây kẽm & dây néo vào 1 LineSegments duy nhất
+    const wireVerts = [];
 
     let iPost = 0, iAnchor = 0, iPF = 0, iRunner = 0, iPFLeaf = 0, iPFFruit = 0;
     let iCacao = 0, iCBranch = 0, iCSub = 0, iCOld = 0, iCYoung = 0, iPodY = 0, iPodR = 0;
 
-    // =========================================================================
-    // 1. BỐ TRÍ 31 HÀNG CHANH DÂY (x từ -45 đến +45, bước 3m)
-    // =========================================================================
+    // 1. 31 HÀNG CHANH DÂY
     for (let r = 0; r < PF_ROWS; r++) {
       const x = -45.0 + r * 3.0;
 
-      // Luống đất & ống tưới
       dummy.position.set(x, 0.06, 0); dummy.rotation.set(0, 0, 0); dummy.scale.set(1, 1, 1);
       dummy.updateMatrix();
       instBed.setMatrixAt(r, dummy.matrix);
@@ -282,7 +338,6 @@
       dummy.updateMatrix();
       instPipePF.setMatrixAt(r, dummy.matrix);
 
-      // 21 trụ bê tông / hàng (trải đều từ -45.75 đến +45.75, bước 4.575m)
       for (let p = 0; p < POSTS_PER_ROW; p++) {
         const zP = -45.75 + p * 4.575;
         const isEnd = (p === 0 || p === POSTS_PER_ROW - 1);
@@ -299,7 +354,6 @@
         instTBar.setMatrixAt(iPost, dummy.matrix);
         iPost++;
 
-        // Neo đầu hàng
         if (isEnd) {
           const anchorZ = zP + (zP > 0 ? 0.75 : -0.75);
           dummy.position.set(x, 0.04, anchorZ);
@@ -310,12 +364,10 @@
         }
       }
 
-      // 3 dây kẽm dọc giàn dài 91.5m
       [-tWidth / 2, 0, tWidth / 2].forEach(dx => {
         wireVerts.push(x + dx, postH, -45.75,  x + dx, postH, 45.75);
       });
 
-      // 62 cây chanh dây mỗi hàng (z từ -45.75 đến +45.75, bước 1.5m)
       for (let i = 0; i < PF_PLANTS_PER_ROW; i++) {
         const z = -45.75 + i * 1.5;
 
@@ -328,7 +380,6 @@
         instPFStem.setMatrixAt(iPF, dummy.matrix);
         iPF++;
 
-        // 2 cành rủ sang 2 bên chữ T
         for (let b = 0; b < 2; b++) {
           dummy.position.set(x, postH, z + (rand() - 0.5) * 0.25);
           dummy.rotation.set(0, (b === 0 ? 0 : Math.PI) + (rand() - 0.5) * 0.4, 0);
@@ -337,7 +388,6 @@
           instPFRunner.setMatrixAt(iRunner++, dummy.matrix);
         }
 
-        // 22 lá phủ vòm giàn
         for (let l = 0; l < PF_LEAVES_PER_PLANT; l++) {
           const lx = x + (rand() - 0.5) * 1.25;
           const dist = Math.abs(lx - x);
@@ -352,7 +402,6 @@
           instPFLeaf.setMatrixAt(iPFLeaf++, dummy.matrix);
         }
 
-        // 4 quả tím dưới vòm
         for (let f = 0; f < PF_FRUITS_PER_PLANT; f++) {
           dummy.position.set(x + (rand() - 0.5) * 0.95, postH - 0.12 - rand() * 0.22, z + (rand() - 0.5) * 1.25);
           dummy.rotation.set((rand() - 0.5) * 0.2, 0, (rand() - 0.5) * 0.2);
@@ -364,9 +413,7 @@
       }
     }
 
-    // =========================================================================
-    // 2. BỐ TRÍ 30 HÀNG CACAO XEN GIỮA (x từ -43.5 đến +43.5, bước 3m)
-    // =========================================================================
+    // 2. 30 HÀNG CACAO XEN GIỮA
     for (let r = 0; r < CACAO_ROWS; r++) {
       const x = -43.5 + r * 3.0;
 
@@ -374,36 +421,31 @@
       dummy.updateMatrix();
       instPipeCacao.setMatrixAt(r, dummy.matrix);
 
-      // 31 cây cacao mỗi hàng (z từ -45 đến +45, bước 3m)
       for (let i = 0; i < CACAO_PER_ROW; i++) {
         const z = -45.0 + i * 3.0;
-        const jScale = 0.92 + rand() * 0.22; // chiều cao phân chảng ~0.92 - 1.14m
+        const jScale = 0.92 + rand() * 0.22;
         const jHeight = 1.0 * jScale;
 
-        // Bồn gốc phủ rơm
         dummy.position.set(x, 0.03, z); dummy.rotation.set(0, rand() * Math.PI, 0); dummy.scale.set(1, 1, 1);
         dummy.updateMatrix();
         instMulch.setMatrixAt(iCacao, dummy.matrix);
 
-        // Thân chính
         dummy.position.set(x, 0, z); dummy.rotation.set(0, rand() * Math.PI * 2, 0); dummy.scale.set(1, jScale, 1);
         dummy.updateMatrix();
         instCTrunk.setMatrixAt(iCacao, dummy.matrix);
         iCacao++;
 
-        // 4 cành chảng ba + 8 cành cấp 2 + lá + đọt non
         const baseAng = rand() * Math.PI * 2;
         for (let b = 0; b < 4; b++) {
           const ang = baseAng + (b * Math.PI) / 2 + (rand() - 0.5) * 0.35;
           const bScale = 0.85 + rand() * 0.35;
 
           dummy.position.set(x, jHeight, z);
-          dummy.rotation.set(0, -ang, 0); // Tube nhánh hướng +X nên xoay quanh Y góc -ang
+          dummy.rotation.set(0, -ang, 0);
           dummy.scale.set(bScale, bScale, bScale);
           dummy.updateMatrix();
           instCBranch.setMatrixAt(iCBranch++, dummy.matrix);
 
-          // 2 cành cấp 2 tỏa quạt từ giữa cành chính
           const midX = x + Math.cos(ang) * 0.48 * bScale;
           const midY = jHeight + 0.34 * bScale;
           const midZ = z + Math.sin(ang) * 0.48 * bScale;
@@ -417,7 +459,6 @@
             instCSubBranch.setMatrixAt(iCSub++, dummy.matrix);
           }
 
-          // 13 lá già xanh đậm mỗi cành
           for (let l = 0; l < 13; l++) {
             const t = 0.25 + rand() * 0.9;
             const sAng = ang + (rand() - 0.5) * 1.15;
@@ -433,7 +474,6 @@
             instCOldLeaf.setMatrixAt(iCOld++, dummy.matrix);
           }
 
-          // 3 đọt lá non màu hồng đỏ ở đầu cành
           const endX = x + Math.cos(ang) * 0.95 * bScale;
           const endY = jHeight + 0.58 * bScale;
           const endZ = z + Math.sin(ang) * 0.95 * bScale;
@@ -447,7 +487,6 @@
           }
         }
 
-        // Quả cacao vàng (3 quả) & đỏ cam (2 quả) mọc trên thân chính
         for (let py = 0; py < 3; py++) {
           const pAng = rand() * Math.PI * 2;
           const ph = 0.35 + rand() * (jHeight - 0.3);
@@ -471,12 +510,10 @@
       }
     }
 
-    // Thêm toàn bộ dây kẽm vào 1 LineSegments duy nhất
     const wireGeo = new THREE.BufferGeometry();
     wireGeo.setAttribute('position', new THREE.Float32BufferAttribute(wireVerts, 3));
     scene.add(new THREE.LineSegments(wireGeo, new THREE.LineBasicMaterial({ color: 0xd8dee4 })));
 
-    // Đưa tất cả InstancedMesh vào Scene
     [
       instBed, instPipePF, instPipeCacao,
       instPost, instTBar, instAnchor,
